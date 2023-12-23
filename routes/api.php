@@ -22,9 +22,12 @@ Route::post('register',[AuthController::class,'register']);
 Route::post('login', [AuthController::class,'login']);
 Route::post('refresh', [AuthController::class,'refresh']);
 Route::post('logout', [AuthController::class,'logout']);
+
+// Dashboard
 Route::get('dashboard/risk_count', [DashboardController::class, 'riskCount']);
-Route::get('dashboard/risk_treatment_by_category', [DashboardController::class, 'getRiskTreatmentByCategory']);
-Route::get('dashboard/risk_risk_summary', [DashboardController::class, 'getRiskSummary']);
+Route::get('dashboard/risk_treatment_by_categories', [DashboardController::class, 'getRiskTreatmentByCategory']);
+Route::get('dashboard/risk_summaries', [DashboardController::class, 'getRiskSummary']);
+Route::get('dashboard/risk_treatment_details', [DashboardController::class, 'getRiskTreatmentDetails']);
 Route::get('dashboard/select_options', [DashboardController::class, 'getSelectOptions']);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

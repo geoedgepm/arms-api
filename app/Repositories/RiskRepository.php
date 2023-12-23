@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\DB;
+use App\Enums\RiskStatus;
 
 /**
  * Class RiskRepository.
@@ -65,7 +66,7 @@ class RiskRepository extends BaseRepository
       //TODO: apply access condition record base user role/position
 
       return $query->where('ImpactAddCtrlCategory', '<>', 'Accept')
-      ->where('RiskStatus', 'Active')
+      ->where('RiskStatus', RiskStatus::ACTIVE)
       ->groupBy('ImpactStatus')
       ->get();
    }
@@ -95,9 +96,9 @@ class RiskRepository extends BaseRepository
       }
 
       $results = DB::table('rms_risk_register AS RR')
-      ->select('RR.Risk_ID', 'RiskEvent')
-      ->selectRaw('COUNT(DISTINCT IRAT.RAT_ID) AS ImpRiskTreatment')
-      ->selectRaw('COUNT(DISTINCT LRAT.RAT_ID) AS LikRiskTreatment')
+      ->select('RR.Risk_ID AS riskId', 'RiskEvent AS riskEvent')
+      ->selectRaw('COUNT(DISTINCT IRAT.RAT_ID) AS impRiskTreatment')
+      ->selectRaw('COUNT(DISTINCT LRAT.RAT_ID) AS likRiskTreatment')
       ->leftJoin(DB::raw("(SELECT RAT_ID, Risk_ID, ImpactAddCtrlCategory FROM rms_risk_add_treatment WHERE ImpactAddCtrlCategory <> 'Accept'".$impactRiskStatusFilter.$impCategoryFilter.") AS IRAT"), function ($join) {
          $join->on('RR.Risk_ID', '=', 'IRAT.Risk_ID');
       })
@@ -105,7 +106,7 @@ class RiskRepository extends BaseRepository
          $join->on('RR.Risk_ID', '=', 'LRAT.Risk_ID');
       })
       ->where('RR.Risk_ID', '<>', '')
-      ->where('RR.RiskStatus', '=', 'Active')
+      ->where('RR.RiskStatus', '=', RiskStatus::ACTIVE)
       ->where(function ($query) use ($option) {
          if ( isset($option['fiscalYear']) && $option['fiscalYear'] ) {
             $query->where('FiscalYear', $option['fiscalYear']);
@@ -155,12 +156,42 @@ class RiskRepository extends BaseRepository
       //TODO: apply access condition record base user role/position
 
       return $query->where('ImpactAddCtrlCategory', '<>', 'Accept')
-      ->where('RiskStatus', 'Active')
+      ->where('RiskStatus', RiskStatus::ACTIVE)
       ->groupBy('ImpactAddCtrlCategory')
       ->get();
    }
 
-   function getRiskTreatmentDetails() {
+   /**
+    * Get risk treatment details for dashboard
+    */
+   function getRiskTreatmentDetails($option = []) {
+      $query = DB::table('rms_risk_add_treatment as RAT')
+      ->select(
+         'RAT_ID AS ratId',
+         'RAT.Risk_ID AS riskId',
+         'ImpactAddCtrlCategory AS impactAddCtrlCategory',
+         'ImpactAddCtrlDescription AS impactAddCtrlDescription',
+         'ImpactPIC AS impactPIC',
+         DB::raw("DATE_FORMAT(ImpactDueDate, '%d/%m/%Y') AS dueDate"),
+         DB::raw("FORMAT(ImpactCost, 2) AS cost"),
+         'ImpactStatus AS status',
+         'ImpactRemarks AS remarks'
+      )
+      ->join('rms_risk_register as RR', 'RAT.Risk_ID', '=', 'RR.Risk_ID')
+      ->where('ImpactAddCtrlCategory', '<>', 'Accept')
+      ->where('RiskStatus', '=', RiskStatus::ACTIVE)
+      ->where(function($query) use($option) {
+         $this->filterOption($option, $query);
+      });
 
+      if ( isset($option['offset']) && $option['offset'] ) {
+         $query->offset(($option['offset']));
+      }
+
+      if ( isset($option['limit']) && $option['limit'] ) {
+         $query->offset(($option['limit']));
+      }
+      
+      return $query->get();
    }
 }
