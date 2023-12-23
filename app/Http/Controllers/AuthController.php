@@ -14,6 +14,38 @@ use App\Models\User;
 
 class AuthController extends BaseController
 {
+    public function __construct()
+    {
+        $this->middleware('auth:api', ['except' => ['login','register','refresh','logout']]);
+    }
+
+    public function register(Request $request){
+        $request->validate([
+            'name' => 'required|string',
+            'email' => 'required|string',
+            'password' => 'required|string',
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        return $user;
+
+        $token = Auth::guard('api')->login($user);
+        return response()->json([
+            'status' => 'success',
+            'message' => 'User created successfully',
+            'user' => $user,
+            'authorisation' => [
+                'token' => $token,
+                'type' => 'bearer',
+            ]
+        ]);
+    }
+
     /**
      * Handle an authentication attempt.
      *
@@ -80,7 +112,7 @@ class AuthController extends BaseController
             'password' => ['required'],
         ]);
         
-        $token = Auth::guard('api')->attempt(['EmailID' => 'abharata@deloitte.com', 'Password' => '123456']);
+        $token = Auth::guard('api')->attempt(['email' => 'abharata@deloitte.com', 'password' => '123456']);
         return ['token' => $token, 'account' => $credentials['email'], 'password' => $credentials['password']];
         if (!$token) {
             return response()->json([

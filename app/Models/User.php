@@ -9,11 +9,11 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable implements JWTSubject
+class User extends Authenticatable// implements JWTSubject
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    protected $table = 'tbl_user';
+    protected $table = 'users';
 
     /**
      * The attributes that are mass assignable.
@@ -21,9 +21,8 @@ class User extends Authenticatable implements JWTSubject
      * @var array<int, string>
      */
     protected $fillable = [
-        'Firstname',
-        'EmailID',
-        'Password',
+        'email',
+        'password',
     ];
 
     /**
@@ -32,7 +31,7 @@ class User extends Authenticatable implements JWTSubject
      * @var array<int, string>
      */
     protected $hidden = [
-        'Password',
+        'password',
         'remember_token',
     ];
 
@@ -49,25 +48,24 @@ class User extends Authenticatable implements JWTSubject
      * @var array<string, string>
      */
     protected $casts = [
-        'email_verified_at' => 'datetime',
-        'Password' => 'hashed'
+        'email_verified_at' => 'datetime'
     ];
 
-    public function getJWTIdentifier()
-    {
-      return $this->getKey();
-    }
+    // public function getJWTIdentifier()
+    // {
+    //   return $this->getKey();
+    // }
 
-    public function getJWTCustomClaims()
-    {
-      return [
-        'EmailID' => $this->email,
-        'Firstname' => $this->name
-      ];
-    }
+    // public function getJWTCustomClaims()
+    // {
+    //   return [
+    //     'email' => $this->email,
+    //     'Firstname' => $this->name
+    //   ];
+    // }
 
-    public function getAuthPassword() 
-    { 
-        return $this->password; 
-    }
+    // public function getAuthPassword() 
+    // { 
+    //     return $this->password; 
+    // }
 }
