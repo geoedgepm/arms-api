@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\RiskController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,6 +30,9 @@ Route::get('dashboard/risk_treatment_by_categories', [DashboardController::class
 Route::get('dashboard/risk_summaries', [DashboardController::class, 'getRiskSummary']);
 Route::get('dashboard/risk_treatment_details', [DashboardController::class, 'getRiskTreatmentDetails']);
 Route::get('dashboard/select_options', [DashboardController::class, 'getSelectOptions']);
+
+// Risk
+Route::resource('risks', RiskController::class);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

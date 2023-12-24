@@ -3,21 +3,20 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Controllers\BaseController;
 use App\Repositories\DashboardRepository;
 use App\Repositories\RiskRepository;
-use App\Http\Controllers\BaseController;
+use App\Repositories\ImpactRiskRepository;
+use App\Repositories\LikeLihoodRiskRepository;
 
 class DashboardController extends BaseController {
-    private $repository;
-    private $riskRepository;
-
+    
     public function __construct(
-        DashboardRepository $repository,
-        RiskRepository $riskRepository,
-    ) {
-        $this->repository = $repository;
-        $this->riskRepository = $riskRepository;
-    }
+        private DashboardRepository $repository,
+        private RiskRepository $riskRepository,
+        private ImpactRiskRepository $impactRiskRepository,
+        private LikeLihoodRiskRepository $likeLihoodRiskRepository,
+    ) {}
 
     /**
      * Get select options data for dashboard form
@@ -27,31 +26,37 @@ class DashboardController extends BaseController {
     }
 
     /***
-     * Get risk count
+     * Get risk count for statistic
      */
     public function riskCount(Request $request)
     {
-        return $this->responses($this->riskRepository->getRiskCount());
+        $repository = $this->riskRepository->getRiskRepository($request->rmType);
+        return $this->responses($this->{$repository}->getRiskCount());
     }
 
     /**
      * Get risk summary
      */
-    public function getRiskSummary() {
-        return $this->responses($this->riskRepository->getRiskSummary());
+    public function getRiskSummary(Request $request) {
+        $repository = $this->riskRepository->getRiskRepository($request->rmType);
+        $option = $request->only('fiscalYear', 'quarter', 'department', 'directorate', 'division', 'rmType');
+
+        return $this->responses($this->{$repository}->getRiskSummary($option));
     }
 
     /**
      * Get risk treatment by category
      */
-    public function getRiskTreatmentByCategory() {
-        return $this->responses($this->riskRepository->getRiskTreatmentByCategories());
+    public function getRiskTreatmentByCategory(Request $request) {
+        $repository = $this->riskRepository->getRiskRepository($request->rmType);
+        return $this->responses($this->{$repository}->getRiskTreatmentByCategories($request->only('rmType')));
     }
 
     /**
      * Get risk treament details
      */
-    public function getRiskTreatmentDetails() {
-        return $this->responses($this->riskRepository->getRiskTreatmentDetails());
+    public function getRiskTreatmentDetails(Request $request) {
+        $repository = $this->riskRepository->getRiskRepository($request->rmType);
+        return $this->responses($this->{$repository}->getRiskTreatmentDetails());
     }
 }
