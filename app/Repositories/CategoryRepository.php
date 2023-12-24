@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Repositories\Core\BaseRepository;
+use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\DB;
 
 /**

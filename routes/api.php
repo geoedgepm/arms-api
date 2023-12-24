@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RiskController;
+use App\Http\Controllers\RiskMatrixController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,6 +34,7 @@ Route::get('dashboard/select_options', [DashboardController::class, 'getSelectOp
 
 // Risk
 Route::resource('risks', RiskController::class);
+Route::resource('risks_matrix', RiskMatrixController::class);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

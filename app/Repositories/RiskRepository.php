@@ -52,6 +52,10 @@ class RiskRepository extends BaseRepository
             $query->where('ImpactAddCtrlCategory', '<>', "Accept");
          } else if ($rmType == RiskType::LIKE_LIHOOD) {
             $query->where('LikelihoodAddCtrlCategory', '<>', "Accept");
+         } else if ($rmType == RiskType::INHERENT) {
+
+         } else if ($rmType == RiskType::RESIDUAL) {
+
          }
       }
 
