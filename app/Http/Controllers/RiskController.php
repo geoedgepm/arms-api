@@ -23,7 +23,7 @@ class RiskController extends BaseController
      */
     public function index()
     {
-        //
+        return $this->repository->getMany();
     }
 
     /**
