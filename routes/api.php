@@ -26,7 +26,11 @@ Route::group([
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::post('me', [AuthController::class, 'me']);
+});
 
+Route::group([
+    'middleware' => 'auth:api',
+], function () {
     // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index']);
     Route::get('dashboard/risk_count', [DashboardController::class, 'riskCount']);
@@ -39,7 +43,7 @@ Route::group([
 Route::post('accounts/login', [AuthController::class, 'authenticate']);
 Route::post('accounts/register', [AuthController::class, 'register']);
 Route::post('register',[AuthController::class,'register']);
-Route::post('login', [AuthController::class,'login']);
+Route::get('unauthorized', [AuthController::class, 'unauthorized'])->name('unauthorized');
 Route::post('logout', [AuthController::class,'logout']);
 
 // Risk

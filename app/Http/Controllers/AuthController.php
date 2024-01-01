@@ -18,7 +18,7 @@ class AuthController extends BaseController
     public function __construct()
     {
         # By default we are using here auth:api middleware
-        $this->middleware('auth:api', ['except' => ['login']]);
+        $this->middleware('auth:api', ['except' => ['login', 'unauthorized']]);
     }
 
     public function register(Request $request) {
@@ -97,6 +97,16 @@ class AuthController extends BaseController
         # When access token will be expired, we are going to generate a new one wit this function 
         # and return it here in response
         return $this->respondWithToken(auth()->refresh());
+    }
+
+    /**
+     * unauthorized.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function unauthorized()
+    {
+        return response()->json(['error' => 'Unauthorized'], 401);;
     }
 
     /**
