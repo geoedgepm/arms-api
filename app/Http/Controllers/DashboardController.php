@@ -18,6 +18,29 @@ class DashboardController extends BaseController {
         private LikeLihoodRiskRepository $likeLihoodRiskRepository,
     ) {}
 
+    /***
+     * Get risk count for statistic
+     */
+    public function index(Request $request)
+    {
+        $option = $request->only('fiscalYear', 'quarter', 'department', 'directorate', 'division', 'rmType');
+        $repository = $this->riskRepository->getRiskRepository($option['rmType']);
+
+        $options = $this->repository->getSelectOptions();
+        $riskCount = $this->{$repository}->getRiskCount();
+        $riskSummaries = $this->{$repository}->getRiskSummary($option);
+        $riskTreatmentByCategories = $this->{$repository}->getRiskTreatmentByCategories($option);
+        $riskTreatmentDetails = $this->{$repository}->getRiskTreatmentDetails();
+
+        return $this->responses([
+            'options' => $options,
+            'riskCount' => $riskCount,
+            'riskSummaries' => $riskSummaries,
+            'riskTreatmentByCategories' => $riskTreatmentByCategories,
+            'riskTreatmentDetails' => $riskTreatmentDetails
+        ]);
+    }
+
     /**
      * Get select options data for dashboard form
      */

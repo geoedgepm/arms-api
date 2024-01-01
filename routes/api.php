@@ -20,12 +20,20 @@ use App\Http\Controllers\RiskMatrixController;
 
 Route::group([
     'middleware' => 'api',
-    'prefix' => 'auth'
+    // 'prefix' => 'auth'
 ], function ($router) {
     Route::post('login', [AuthController::class, 'login']);
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::post('me', [AuthController::class, 'me']);
+
+    // Dashboard
+    Route::get('dashboard', [DashboardController::class, 'index']);
+    Route::get('dashboard/risk_count', [DashboardController::class, 'riskCount']);
+    Route::get('dashboard/risk_treatment_by_categories', [DashboardController::class, 'getRiskTreatmentByCategory']);
+    Route::get('dashboard/risk_summaries', [DashboardController::class, 'getRiskSummary']);
+    Route::get('dashboard/risk_treatment_details', [DashboardController::class, 'getRiskTreatmentDetails']);
+    Route::get('dashboard/select_options', [DashboardController::class, 'getSelectOptions']);
 });
 
 Route::post('accounts/login', [AuthController::class, 'authenticate']);
@@ -33,13 +41,6 @@ Route::post('accounts/register', [AuthController::class, 'register']);
 Route::post('register',[AuthController::class,'register']);
 Route::post('login', [AuthController::class,'login']);
 Route::post('logout', [AuthController::class,'logout']);
-
-// Dashboard
-Route::get('dashboard/risk_count', [DashboardController::class, 'riskCount']);
-Route::get('dashboard/risk_treatment_by_categories', [DashboardController::class, 'getRiskTreatmentByCategory']);
-Route::get('dashboard/risk_summaries', [DashboardController::class, 'getRiskSummary']);
-Route::get('dashboard/risk_treatment_details', [DashboardController::class, 'getRiskTreatmentDetails']);
-Route::get('dashboard/select_options', [DashboardController::class, 'getSelectOptions']);
 
 // Risk
 Route::resource('risks', RiskController::class);

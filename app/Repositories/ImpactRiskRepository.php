@@ -164,8 +164,8 @@ class ImpactRiskRepository extends RiskRepository
       ->select(
          'RAT_ID AS ratId',
          'RAT.Risk_ID AS riskId',
-         'ImpactAddCtrlCategory AS impactAddCtrlCategory',
-         'ImpactAddCtrlDescription AS impactAddCtrlDescription',
+         'ImpactAddCtrlCategory AS category',
+         'ImpactAddCtrlDescription AS description',
          'ImpactPIC AS impactPIC',
          DB::raw("DATE_FORMAT(ImpactDueDate, '%d/%m/%Y') AS dueDate"),
          DB::raw("FORMAT(ImpactCost, 2) AS cost"),

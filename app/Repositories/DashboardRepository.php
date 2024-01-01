@@ -15,8 +15,8 @@ class DashboardRepository extends BaseRepository
     */
    function getSelectOptions() {
       $riskTreatmentFors = [
-         'impact' => 'Impact Risk Treatment',
-         'likelihood' => 'Likelihood Risk Treatment'
+         ['value' => 'impact', 'label' => 'Impact Risk Treatment'],
+         ['value' => 'likelihood', 'label' => 'Likelihood Risk Treatment']
       ];
 
       $departments = DB::table('org_chart')
@@ -30,7 +30,10 @@ class DashboardRepository extends BaseRepository
       ->get();
 
       $divisions = DB::table('org_chart')
-      ->select('Division AS division')
+      ->select([
+         'Division AS label',
+         'Division AS value',
+      ])
       ->distinct()
       ->get();
 
@@ -40,17 +43,17 @@ class DashboardRepository extends BaseRepository
       ];
 
       $categories = [
-         'Avoid',
-         'Mitigate/Reduce',
-         'Transfer'
+         ['value' => 'Avoid', 'label' => 'Avoid'],
+         ['value' => 'Transfer', 'label' => 'Transfer'],
+         ['value' => 'Mitigate/Reduce', 'label' => 'Mitigate/Reduce']
       ];
 
       $statuses = [
-         'Cancelled',
-         'Not Started',
-         'In Progress',
-         'Near Due Date',
-         'Overdue'
+         ['value' => 'Cancelled', 'label' => 'Cancelled'],
+         ['value' => 'Not Started', 'label' => 'Not Started'],
+         ['value' => 'In Progress', 'label' => 'In Progress'],
+         ['value' => 'Near Due Date', 'label' => 'Near Due Date'],
+         ['value' => 'Overdue', 'label' => 'Overdue']
       ];
 
       return [
