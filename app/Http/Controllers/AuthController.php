@@ -2,24 +2,26 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Http\RedirectResponse;
 use App\Http\Controllers\BaseController;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 
 class AuthController extends BaseController
 {
+    /**
+     * Create a new AuthController instance.
+     *
+     * @return void
+     */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login','register','refresh','logout']]);
+        # By default we are using here auth:api middleware
+        $this->middleware('auth:api', ['except' => ['login']]);
     }
 
-    public function register(Request $request){
+    public function register(Request $request) {
         $request->validate([
             'name' => 'required|string',
             'email' => 'required|string',
@@ -47,112 +49,71 @@ class AuthController extends BaseController
     }
 
     /**
-     * Handle an authentication attempt.
+     * Get a JWT via given credentials.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function authenticate(Request $request)
+    public function login()
     {
-        $phone_number = $request->header('account');
-        $password = $request->header('password');
+        $credentials = request(['email', 'password']);
 
-        $validator = Validator::make(['phone_number' => $phone_number, 'password' => $password], [
-            'phone_number' => 'required',
-            'password' => 'required'
-        ]);
-
-        if ($validator->fails()) {
-            return $this->responseError('bad_request', 'Please provide phone number and password');
+        if (! $token = auth()->attempt($credentials)) {
+            return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        if (Auth::attempt(['email' => $phone_number, 'password' => $password])) {
-            $token = hash('sha256', Str::random(60));
-
-            $user = Auth::user();
-
-            return response()->json([
-                'access_token' => $token,
-                'profile' => [
-                    'id'             => $user->id,
-                    'name'           => $user->name,
-                    'type'           => $user->type,
-                    'unit'           => $user->unit ? $user->unit->name : '',
-                    'unit_short_name'=> $user->unit ? $user->unit->short_name : '',
-                    'phone_number'   => $user->email,
-                    'photo'          => $user->avatar,
-                    'province_id'    => $user->province_id,
-                    'province'       => $user->province ? $user->province->name_km : '',
-                    'attachment1'    => $user->reporterAccount ? $user->reporterAccount->attachment1 : '',
-                    'attachment2'    => $user->reporterAccount ? $user->reporterAccount->attachment2 : ''
-                ]
-            ]);
-        }
-
-        return $this->responseError('forbiden', 'Invalid username or password');
+        return $this->respondWithToken($token);
     }
 
     /**
-     * Handle an authentication attempt.
+     * Get the authenticated User.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function login(Request $request)
+    public function me()
     {
-        // return User::where([
-        //     'EmailID' => 'abharata@deloitte.com'
-        // ])
-        // ->update([
-        //     'Password' => bcrypt('123456')
-        // ]);
-
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ]);
-        
-        $token = Auth::guard('api')->attempt(['email' => 'abharata@deloitte.com', 'password' => '123456']);
-        return ['token' => $token, 'account' => $credentials['email'], 'password' => $credentials['password']];
-        if (!$token) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Unauthorized',
-            ], 401);
-        }
-
-        $user = Auth::guard('api')->user();
-    
-        return response()->json([
-                'status' => 'success',
-                'user' => $user,
-                'authorization' => [
-                    'token' => $token,
-                    'type' => 'bearer',
-                ]
-            ]);
-
+        # Here we just get information about current user
+        return response()->json(auth()->user());
     }
 
+    /**
+     * Log the user out (Invalidate the token).
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function logout()
     {
-        Auth::guard('api')->logout();
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Successfully logged out',
-        ]);
+        auth()->logout(); # This is just logout function that will destroy access token of current user
+
+        return response()->json(['message' => 'Successfully logged out']);
     }
 
-
+    /**
+     * Refresh a token.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function refresh()
     {
+        # When access token will be expired, we are going to generate a new one wit this function 
+        # and return it here in response
+        return $this->respondWithToken(auth()->refresh());
+    }
+
+    /**
+     * Get the token array structure.
+     *
+     * @param  string $token
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    protected function respondWithToken($token)
+    {
+        # This function is used to make JSON response with new
+        # access token of current user
         return response()->json([
-            'status' => 'success',
-            'user' => Auth::guard('api')->user(),
-            'authorisation' => [
-                'token' => Auth::guard('api')->refresh(),
-                'type' => 'bearer',
-            ]
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth()->factory()->getTTL() * 60
         ]);
     }
 }
