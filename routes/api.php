@@ -29,7 +29,7 @@ Route::group([
 });
 
 Route::group([
-    'middleware' => 'auth:api',
+    // 'middleware' => 'auth:api',
 ], function () {
     // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index']);
